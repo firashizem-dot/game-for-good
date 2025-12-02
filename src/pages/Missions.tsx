@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 
@@ -43,6 +43,7 @@ interface Mission {
 
 const Missions = () => {
   const [missions, setMissions] = useState<Mission[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [formData, setFormData] = useState({
@@ -51,6 +52,12 @@ const Missions = () => {
     status: "active",
     points: 0,
   });
+
+  const filteredMissions = missions.filter(
+    (mission) =>
+      mission.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (mission.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+  );
   const { toast } = useToast();
 
   useEffect(() => {
@@ -272,6 +279,16 @@ const Missions = () => {
           </Dialog>
         </div>
 
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher une mission..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-secondary border-border"
+          />
+        </div>
+
         <div className="bg-card rounded-lg border border-border overflow-hidden">
           <Table>
             <TableHeader>
@@ -284,14 +301,14 @@ const Missions = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {missions.length === 0 ? (
+              {filteredMissions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No missions yet. Create your first mission!
+                    {searchQuery ? "Aucune mission trouvée" : "No missions yet. Create your first mission!"}
                   </TableCell>
                 </TableRow>
               ) : (
-                missions.map((mission) => (
+                filteredMissions.map((mission) => (
                   <TableRow key={mission.id} className="border-border hover:bg-muted/50">
                     <TableCell className="font-medium">{mission.title}</TableCell>
                     <TableCell className="max-w-md truncate">
